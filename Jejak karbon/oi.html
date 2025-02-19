@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kalkulator Jejak Karbon Elektronik</title>
+  <style>
+    /* Ganti "bg-image.png" sesuai nama atau lokasi file gambar background */
+    body {
+      font-family: Arial, sans-serif;
+      /* Menggunakan gambar latar */
+      background: url("bgwebjejak.jpg") no-repeat center center fixed;
+      background-size: cover;
+      
+      /* Mengatur margin dan tinggi halaman */
+      margin: 0;
+      height: 100vh;
+      
+      /* Menggunakan flexbox untuk memusatkan konten */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .container {
+      /* Latar belakang putih semi-transparan agar konten tetap jelas */
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      max-width: 400px;
+      width: 100%;
+    }
+    h1 {
+      text-align: center;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .btn {
+      width: 100%;
+      background: #4caf50;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+    .btn:hover {
+      background: #45a049;
+    }
+    .result {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Kalkulator Jejak Karbon Elektronik</h1>
+    <div id="device-container" class="form-group">
+      <label for="device-type1">Pilih Jenis Peralatan Elektronik:</label>
+      <select id="device-type1">
+        <option value="TV">TV</option>
+        <option value="Kulkas">Kulkas</option>
+        <option value="Laptop">Laptop</option>
+        <option value="AC">AC</option>
+        <option value="Lampu">Lampu</option>
+        <option value="Printer">Printer</option>
+        <option value="Setrika">Setrika</option>
+        <option value="Microwave">Microwave</option>
+      </select>
+      <label for="power1">Daya Peralatan (Watt):</label>
+      <input type="number" id="power1" placeholder="Masukkan daya peralatan">
+      <label for="hours1">Jam Penggunaan per Hari (maks 24 jam):</label>
+      <input type="number" id="hours1" placeholder="Masukkan jam penggunaan per hari" max="24" oninput="if(this.value > 24){ this.value = 24; }">
+      <label for="quantity1">Jumlah yang Digunakan:</label>
+      <input type="number" id="quantity1" placeholder="Masukkan jumlah alat yang digunakan">
+    </div>
+    <button class="btn" onclick="addDevice()">Tambah Peralatan Elektronik</button>
+    <button class="btn" onclick="calculateEmissions()">Hitung Emisi</button>
+    <button class="btn" style="background: #f44336;" onclick="resetForm()">Reset</button>
+    <div id="result" class="result"></div>
+  </div>
+
+  <script>
+    let deviceIndex = 1;
+
+    function addDevice() {
+      deviceIndex++;
+      const container = document.getElementById('device-container');
+      const deviceGroup = document.createElement('div');
+      deviceGroup.classList.add('form-group');
+      deviceGroup.innerHTML = `
+        <label for="device-type${deviceIndex}">Pilih Jenis Peralatan Elektronik:</label>
+        <select id="device-type${deviceIndex}">
+          <option value="TV">TV</option>
+          <option value="Kulkas">Kulkas</option>
+          <option value="Laptop">Laptop</option>
+          <option value="AC">AC</option>
+          <option value="Lampu">Lampu</option>
+          <option value="Printer">Printer</option>
+          <option value="Setrika">Setrika</option>
+          <option value="Microwave">Microwave</option>
+        </select>
+        <label for="power${deviceIndex}">Daya Peralatan (Watt):</label>
+        <input type="number" id="power${deviceIndex}" placeholder="Masukkan daya peralatan">
+        <label for="hours${deviceIndex}">Jam Penggunaan per Hari (maks 24 jam):</label>
+        <input type="number" id="hours${deviceIndex}" placeholder="Masukkan jam penggunaan per hari" max="24" oninput="if(this.value > 24){ this.value = 24; }">
+        <label for="quantity${deviceIndex}">Jumlah yang Digunakan:</label>
+        <input type="number" id="quantity${deviceIndex}" placeholder="Masukkan jumlah alat yang digunakan">
+      `;
+      container.appendChild(deviceGroup);
+    }
+
+    function calculateEmissions() {
+      let totalEmissions = 0;
+
+      for (let i = 1; i <= deviceIndex; i++) {
+        const power = parseFloat(document.getElementById(`power${i}`).value) || 0;
+        let hoursInput = document.getElementById(`hours${i}`);
+        let hours = parseFloat(hoursInput.value) || 0;
+        const quantity = parseFloat(document.getElementById(`quantity${i}`).value) || 1;
+        
+        // Jika jam penggunaan lebih dari 24, ubah nilai input menjadi 24
+        if (hours > 24) {
+          hours = 24;
+          hoursInput.value = 24;
+        }
+
+        // Rumus sederhana: (daya x jam x jumlah x faktor konversi) / 1000
+        const dailyEmissions = (power * hours * quantity * 0.85) / 1000; // kg CO2 per hari
+        totalEmissions += dailyEmissions * 30; // Emisi per bulan
+      }
+
+      document.getElementById('result').innerText = `Total Emisi Karbon Anda: ${totalEmissions.toFixed(2)} kg CO2 per bulan`;
+    }
+
+    function resetForm() {
+      // Reset device container ke kondisi awal
+      document.getElementById('device-container').innerHTML = `
+        <label for="device-type1">Pilih Jenis Peralatan Elektronik:</label>
+        <select id="device-type1">
+          <option value="TV">TV</option>
+          <option value="Kulkas">Kulkas</option>
+          <option value="Laptop">Laptop</option>
+          <option value="AC">AC</option>
+          <option value="Lampu">Lampu</option>
+          <option value="Printer">Printer</option>
+          <option value="Setrika">Setrika</option>
+          <option value="Microwave">Microwave</option>
+        </select>
+        <label for="power1">Daya Peralatan (Watt):</label>
+        <input type="number" id="power1" placeholder="Masukkan daya peralatan">
+        <label for="hours1">Jam Penggunaan per Hari (maks 24 jam):</label>
+        <input type="number" id="hours1" placeholder="Masukkan jam penggunaan per hari" max="24" oninput="if(this.value > 24){ this.value = 24; }">
+        <label for="quantity1">Jumlah yang Digunakan:</label>
+        <input type="number" id="quantity1" placeholder="Masukkan jumlah alat yang digunakan">
+      `;
+      // Reset deviceIndex dan hasil perhitungan
+      deviceIndex = 1;
+      document.getElementById('result').innerText = '';
+    }
+  </script>
+</body>
+</html>
